@@ -1,0 +1,10 @@
+[apiKeys]
+# API key for the openweather api
+weatherAPI=""
+
+[updateIntervals]
+# Intervals in seconds for updating specific data
+cpuTemp=60
+memory=60
+weather=3600
+time=120
