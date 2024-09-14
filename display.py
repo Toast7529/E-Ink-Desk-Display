@@ -1,4 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont
+import requests
+import urllib.request 
+from datetime import datetime
+
 im = Image.open("base.png")
 
 def displayMemory():
@@ -22,8 +26,41 @@ def displayCPU():
     barWidth = int(currentSpeed/maxSpeed*113) + 8 #113 is bar width
     draw.line((8,180,barWidth,180), fill=(255,0,0), width=3)
 
+def displayWeather(cityName, apiKey):
+    res = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={apiKey}&units=metric")
+
+    if (res.status_code != 200):
+        return None
+    data = res.json()
+    temp = data['main']['temp']
+
+    font = ImageFont.truetype("arial.ttf", 20)
+    draw = ImageDraw.Draw(im)
+    draw.text((10,120), f"{round(temp,1)}°C", fill=(255,0,0), font=font)
+
+    # Need to design some icons to use instead of theirs, specifically for black and white
+    # iconID = data["weather"][0]["icon"].replace("d","n")    # always use night variation because e-ink is only black and white
+    # urllib.request.urlretrieve(f"https://openweathermap.org/img/wn/{iconID}@2x.png","weatherIcon.png") 
+    # iconImg = Image.open("weatherIcon.png").resize((15,15))
+    # print(f"https://openweathermap.org/img/wn/{iconID}@2x.png")
+    # im.paste(iconImg, (85,120))
+
+def displayTime():
+    now = datetime.now()
+    time = now.strftime("%I:%M%p")
+    date = now.strftime("%A, %b %d")
+    draw = ImageDraw.Draw(im)
+    font = ImageFont.truetype("consola.ttf", 25)
+    draw.text((10,30), time, fill=(255,0,0), font=font)
+
+    draw.text((10,55), date, fill=(255,0,0))
+
+
+
 if __name__ == "__main__":
     print(im.format)
+    displayWeather(1,1)
+    displayTime()
     displayCPU()
     displayMemory()
     im.show()
