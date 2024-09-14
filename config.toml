@@ -1,6 +1,7 @@
 [apiKeys]
 # API key for the openweather api
 weatherAPI=""
+cityName=""
 
 [updateIntervals]
 # Intervals in seconds for updating specific data
