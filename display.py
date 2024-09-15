@@ -1,10 +1,9 @@
 from PIL import Image, ImageDraw, ImageFont
 import requests
-import urllib.request 
 from datetime import datetime
-
-im = Image.open("base.png")
-
+import random
+im = Image.open("base.png").convert('RGBA')
+faces = ["Awakening","Bored","Cool","Demotivated","Happy","Intense","Lonely","Sleeping"]
 def displayMemory():
     currentMemory = 3138    # fetch sys info
     maxMemory = 4000
@@ -39,7 +38,9 @@ def displayWeather(cityName, apiKey):
     draw.text((10,120), f"{round(temp,1)}°C", fill=(255,0,0), font=font)
 
     # Need to design some icons to use instead of theirs, specifically for black and white
-    # iconID = data["weather"][0]["icon"].replace("d","n")    # always use night variation because e-ink is only black and white
+    iconID = data["weather"][0]["icon"].replace("n","d")
+    iconImage = Image.open(f"Assets/WeatherIcons/{iconID}.png").convert('RGBA')
+    im.paste(iconImage, (80,115), iconImage)
     # urllib.request.urlretrieve(f"https://openweathermap.org/img/wn/{iconID}@2x.png","weatherIcon.png") 
     # iconImg = Image.open("weatherIcon.png").resize((15,15))
     # print(f"https://openweathermap.org/img/wn/{iconID}@2x.png")
@@ -51,16 +52,16 @@ def displayTime():
     date = now.strftime("%A, %b %d")
     draw = ImageDraw.Draw(im)
     font = ImageFont.truetype("consola.ttf", 25)
-    draw.text((10,30), time, fill=(255,0,0), font=font)
+    draw.text((10,20), time, fill=(255,0,0), font=font)
 
-    draw.text((10,55), date, fill=(255,0,0))
-
+    draw.text((10,45), date, fill=(255,0,0))
 
 
 if __name__ == "__main__":
-    print(im.format)
     displayWeather(1,1)
+    displayFace()
     displayTime()
     displayCPU()
     displayMemory()
     im.show()
+    im.save("test.png")
