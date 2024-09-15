@@ -56,6 +56,11 @@ def displayTime():
 
     draw.text((10,45), date, fill=(255,0,0))
 
+def displayFace():
+    currentFace = random.choice(faces)
+    faceImage = Image.open(f"Assets/Faces/{currentFace}.png").convert('RGBA')
+    im.paste(faceImage, (0,75), faceImage)
+    print(currentFace)
 
 if __name__ == "__main__":
     displayWeather(1,1)
