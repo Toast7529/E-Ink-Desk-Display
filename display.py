@@ -81,15 +81,11 @@ class Display:
         self.displayTime()
         self.displayCPU()
         self.displayMemory()
+        temp = self._image
         self.save(fileName)
         self.clear()
+        return temp
 
 if __name__ == "__main__":
     display = Display("base.png")
-    display.displayWeather(1,1)
-    display.displayFace()
-    display.displayTime()
-    display.displayCPU()
-    display.displayMemory()
-    display.show()
-    display.save("test.png")
+    display.displayAll(1,1, "test.png")
