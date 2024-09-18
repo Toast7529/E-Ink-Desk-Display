@@ -1,72 +1,95 @@
 from PIL import Image, ImageDraw, ImageFont
+import psutil
 import requests
 from datetime import datetime
 import random
-im = Image.open("base.png").convert('RGBA')
-faces = ["Awakening","Bored","Cool","Demotivated","Happy","Intense","Lonely","Sleeping"]
-def displayMemory():
-    currentMemory = 3138    # fetch sys info
-    maxMemory = 4000
-    draw = ImageDraw.Draw(im)
-    draw.text((55,195), f"{int(currentMemory/maxMemory*100)}%  {round(currentMemory/1000,1)}GiB", fill=(255,0,0))
-    # bar is 105 long, 3 tall
-    # draw bar
-    barWidth = int(currentMemory/maxMemory*113) + 8 #113 is bar width
-    draw.line((8,212,barWidth,212), fill=(255,0,0), width=3)
+class Display:
+    def __init__(self, imagePath):
+        self._imagePath = imagePath
+        self._image = Image.open(imagePath).convert('RGBA')
+        self._draw = ImageDraw.Draw(self._image)
+        self.faces = ["Awakening","Bored","Cool","Demotivated","Happy","Intense","Lonely","Sleeping"]
 
-def displayCPU():
-    temp = 42.0
-    currentSpeed = 1.2    # fetch sys info
-    maxSpeed = 3
-    draw = ImageDraw.Draw(im)
-    draw.text((55,163), f"{int(currentSpeed/maxSpeed*100)}%  {temp}°C ", fill=(255,0,0))
-    # bar is 105 long, 3 tall
-    # draw bar
-    barWidth = int(currentSpeed/maxSpeed*113) + 8 #113 is bar width
-    draw.line((8,180,barWidth,180), fill=(255,0,0), width=3)
+    def displayMemory(self):
+        memory = psutil.virtual_memory()
+        currentMemory = memory.used / (1024**3)  # fetch sys info
+        maxMemory = memory.total / (1024**3)
+        # get memory usage and percentage
+        self._draw.text((55,195), f"{int(currentMemory/maxMemory*100)}%  {round(currentMemory,1)}GiB", fill=(255,0,0))
+        barWidth = int(currentMemory/maxMemory*110) + 3 # 113 is bar width
+        self._draw.line((8,212,barWidth,212), fill=(255,0,0), width=3)
 
-def displayWeather(cityName, apiKey):
-    res = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={apiKey}&units=metric")
+    def displayCPU(self):
+        cpuInfo = psutil.cpu_freq()
+        print(cpuInfo)
+        temp = -1 
+        # fetch cpu temperature
+        try:
+            temp = psutil.sensors_temperatures()['cpu_thermal'][0][1]
+        except:
+            print("Couldn't retrieve CPU temps")
+        currentSpeed = cpuInfo.current    # fetch sys info
+        maxSpeed = cpuInfo.max
+        # display CPU percentage and temp
+        self._draw.text((55,163), f"{int(currentSpeed/maxSpeed*100)}%  {temp}°C ", fill=(255,0,0))
 
-    if (res.status_code != 200):
-        return None
-    data = res.json()
-    temp = data['main']['temp']
+        barWidth = int(currentSpeed/maxSpeed*110) + 3 # 113 is bar width
+        self._draw.line((8,180,barWidth,180), fill=(255,0,0), width=3)
 
-    font = ImageFont.truetype("arial.ttf", 20)
-    draw = ImageDraw.Draw(im)
-    draw.text((10,120), f"{round(temp,1)}°C", fill=(255,0,0), font=font)
+    def displayWeather(self, cityName, apiKey):
+        res = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={apiKey}&units=metric")
+        if (res.status_code != 200):
+            print("OpenWeatherAPI error")
+            return
+        data = res.json()
+        temp = data['main']['temp']
 
-    # Need to design some icons to use instead of theirs, specifically for black and white
-    iconID = data["weather"][0]["icon"].replace("n","d")
-    iconImage = Image.open(f"Assets/WeatherIcons/{iconID}.png").convert('RGBA')
-    im.paste(iconImage, (80,115), iconImage)
-    # urllib.request.urlretrieve(f"https://openweathermap.org/img/wn/{iconID}@2x.png","weatherIcon.png") 
-    # iconImg = Image.open("weatherIcon.png").resize((15,15))
-    # print(f"https://openweathermap.org/img/wn/{iconID}@2x.png")
-    # im.paste(iconImg, (85,120))
+        font = ImageFont.truetype("arial.ttf", 20)
+        self._draw.text((10,120), f"{round(temp,1)}°C", fill=(255,0,0), font=font)
+        iconID = data["weather"][0]["icon"].replace("n","d")
+        iconImage = Image.open(f"Assets/WeatherIcons/{iconID}.png").convert('RGBA')
+        self._image.paste(iconImage, (80,115), iconImage)
 
-def displayTime():
-    now = datetime.now()
-    time = now.strftime("%I:%M%p")
-    date = now.strftime("%A, %b %d")
-    draw = ImageDraw.Draw(im)
-    font = ImageFont.truetype("consola.ttf", 25)
-    draw.text((10,20), time, fill=(255,0,0), font=font)
 
-    draw.text((10,45), date, fill=(255,0,0))
+    def displayTime(self):
+        now = datetime.now()
+        time = now.strftime("%I:%M%p")
+        date = now.strftime("%A, %b %d")
+        font = ImageFont.truetype("consola.ttf", 25)
+        self._draw.text((10,20), time, fill=(255,0,0), font=font)
 
-def displayFace():
-    currentFace = random.choice(faces)
-    faceImage = Image.open(f"Assets/Faces/{currentFace}.png").convert('RGBA')
-    im.paste(faceImage, (0,75), faceImage)
-    print(currentFace)
+        self._draw.text((10,45), date, fill=(255,0,0))
 
+    def displayFace(self):
+        currentFace = random.choice(self.faces)
+        faceImage = Image.open(f"Assets/Faces/{currentFace}.png").convert('RGBA')
+        self._image.paste(faceImage, (0,75), faceImage)
+
+    def show(self):
+        self._image.show()
+    
+    def save(self, fileName):
+        self._image.save(fileName)
+        
+    def clear(self):
+        self._image = Image.open(self._imagePath).convert('RGBA')
+        self._draw = ImageDraw.Draw(self._image)
+
+    def displayAll(self, apiKey, cityName, fileName):
+        self.displayWeather(cityName, apiKey)
+        self.displayFace()
+        self.displayTime()
+        self.displayCPU()
+        self.displayMemory()
+        self.show()
+        self.save(fileName)
+        self.clear();
 if __name__ == "__main__":
-    displayWeather(1,1)
-    displayFace()
-    displayTime()
-    displayCPU()
-    displayMemory()
-    im.show()
-    im.save("test.png")
+    display = Display("base.png")
+    display.displayWeather(1,1)
+    display.displayFace()
+    display.displayTime()
+    display.displayCPU()
+    display.displayMemory()
+    display.show()
+    display.save("test.png")
