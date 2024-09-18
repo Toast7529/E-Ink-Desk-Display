@@ -44,8 +44,8 @@ class Display:
         data = res.json()
         temp = data['main']['temp']
 
-        font = ImageFont.truetype("arial.ttf", 20)
-        self._draw.text((10,120), f"{round(temp,1)}°C", fill=(255,0,0), font=font)
+        font = ImageFont.truetype("./Fonts/arial.ttf", 20)
+        self._draw.text((10,120), f"{round(float(temp),1)}°C", fill=(255,0,0), font=font)
         iconID = data["weather"][0]["icon"].replace("n","d")
         iconImage = Image.open(f"Assets/WeatherIcons/{iconID}.png").convert('RGBA')
         self._image.paste(iconImage, (80,115), iconImage)
@@ -55,7 +55,7 @@ class Display:
         now = datetime.now()
         time = now.strftime("%I:%M%p")
         date = now.strftime("%A, %b %d")
-        font = ImageFont.truetype("consola.ttf", 25)
+        font = ImageFont.truetype("./Fonts/consola.ttf", 25)
         self._draw.text((10,20), time, fill=(255,0,0), font=font)
 
         self._draw.text((10,45), date, fill=(255,0,0))
@@ -81,10 +81,9 @@ class Display:
         self.displayTime()
         self.displayCPU()
         self.displayMemory()
-        self.show()
         self.save(fileName)
         self.clear()
-        
+
 if __name__ == "__main__":
     display = Display("base.png")
     display.displayWeather(1,1)
