@@ -83,7 +83,8 @@ class Display:
         self.displayMemory()
         self.show()
         self.save(fileName)
-        self.clear();
+        self.clear()
+        
 if __name__ == "__main__":
     display = Display("base.png")
     display.displayWeather(1,1)
