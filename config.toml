@@ -1,8 +1,8 @@
 [apiKeys]
 # API key for the openweather api
-weatherAPI=""
-cityName=""
+weatherAPI="open_weather_api_key"
+cityName="city_name"
 
 [updateIntervals]
 # Intervals in seconds for updating specific data
-globalTick=120
+globalTick=180
