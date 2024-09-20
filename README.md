@@ -14,7 +14,7 @@
 # Installation:
 1) Clone the repository:
 ```bash
-https://github.com/Toast7529/E-Ink-Desk-Display
+git clone https://github.com/Toast7529/E-Ink-Desk-Display
 ```
 2) Install required Python packages:
 ```bash
